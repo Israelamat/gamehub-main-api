@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\GameRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 class Game
@@ -12,26 +13,33 @@ class Game
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['game:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['game:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['game:read'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['game:read'])]
     private ?float $price = null;
 
     #[ORM\Column]
+    #[Groups(['game:read'])]
     private ?int $stock = null;
 
 
     #[ORM\Column]
+    #[Groups(['game:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'games')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['game:read'])]
     private ?User $createdBy = null;
 
     public function getId(): ?int

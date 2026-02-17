@@ -9,8 +9,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\RecommendationService;
 
-#[Route('/game')]
+#[Route('/games')]
 final class GameController extends AbstractController
 {
     #[Route(name: 'app_game_index', methods: ['GET'])]
@@ -20,7 +21,7 @@ final class GameController extends AbstractController
         return $this->json($games, 200, [], ['groups' => 'game:read']);
     }
 
-    #[Route('/new', name: 'app_game_new', methods: ['POST'])]
+    #[Route('', name: 'app_game_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $data = $request->toArray();
@@ -77,5 +78,18 @@ final class GameController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['message' => 'Gamae deleted'], 200);
+    }
+
+    #[Route('/recommend/{title}', name: 'app_game_show', methods: ['GET'])]
+    public function recommend(
+        string $title,
+        RecommendationService $recommendationService
+    ): Response {
+
+        $recommendations = $recommendationService->getRecommendationsForGame($title);
+        return $this->json([
+            'game' => $title,
+            'recommendations' => $recommendations
+        ], 200, [], ['groups' => 'game:read']);
     }
 }
