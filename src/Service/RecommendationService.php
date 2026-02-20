@@ -3,14 +3,17 @@
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class RecommendationService
 {
     private $client;
+    private $fastApiUrl;
 
-    public function __construct(HttpClientInterface $client)
+    public function __construct(HttpClientInterface $client, string $fastApiUrl)
     {
         $this->client = $client;
+        $this->fastApiUrl = $fastApiUrl;
     }
 
     public function getRecommendationsForGame(string $gameTitle): array
@@ -19,7 +22,7 @@ class RecommendationService
             $safeTitle = rawurlencode($gameTitle);
             $response = $this->client->request(
                 'GET',
-                'http://127.0.0.1:8001/recommend/' . $safeTitle
+                $this->fastApiUrl . $safeTitle
             );
 
             return $response->toArray();
