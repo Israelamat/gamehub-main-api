@@ -30,4 +30,18 @@ class RecommendationService
             return [];
         }
     }
+
+    public function getRecommendationsForGame_id(int $gameId): array
+    {
+        try {
+            $response = $this->client->request(
+                'GET',
+                $this->fastApiUrl . $gameId
+            );
+
+            return $response->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
 }

@@ -40,7 +40,7 @@ class Game
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'games')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['game:read'])]
     private ?User $createdBy = null;
 
@@ -50,9 +50,32 @@ class Game
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'game')]
     private Collection $reviews;
 
+    #[ORM\Column(unique: true)]
+    private ?int $appId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $headerImage = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $genres = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $tags = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $metadata = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $developer = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $screenshot = null;
+
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->stock = 99;
     }
 
     public function getId(): ?int
@@ -158,6 +181,90 @@ class Game
                 $review->setGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAppId(): ?int
+    {
+        return $this->appId;
+    }
+
+    public function setAppId(int $appId): static
+    {
+        $this->appId = $appId;
+
+        return $this;
+    }
+
+    public function getHeaderImage(): ?string
+    {
+        return $this->headerImage;
+    }
+
+    public function setHeaderImage(?string $headerImage): static
+    {
+        $this->headerImage = $headerImage;
+
+        return $this;
+    }
+
+    public function getGenres(): ?string
+    {
+        return $this->genres;
+    }
+
+    public function setGenres(?string $genres): static
+    {
+        $this->genres = $genres;
+
+        return $this;
+    }
+
+    public function getTags(): ?string
+    {
+        return $this->tags;
+    }
+
+    public function setTags(?string $tags): static
+    {
+        $this->tags = $tags;
+
+        return $this;
+    }
+
+    public function getMetadata(): ?string
+    {
+        return $this->metadata;
+    }
+
+    public function setMetadata(?string $metadata): static
+    {
+        $this->metadata = $metadata;
+
+        return $this;
+    }
+
+    public function getDeveloper(): ?string
+    {
+        return $this->developer;
+    }
+
+    public function setDeveloper(?string $developer): static
+    {
+        $this->developer = $developer;
+
+        return $this;
+    }
+
+    public function getScreenshot(): ?string
+    {
+        return $this->screenshot;
+    }
+
+    public function setScreenshot(?string $screenshot): static
+    {
+        $this->screenshot = $screenshot;
 
         return $this;
     }

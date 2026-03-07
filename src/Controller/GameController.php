@@ -92,4 +92,15 @@ final class GameController extends AbstractController
             'recommendations' => $recommendations
         ], 200, [], ['groups' => 'game:read']);
     }
+
+    // #[Route('/recommend/{id}', name: 'app_game_id_shoe', methods: ['GET'])]
+    // public function recommendById(
+    //     int $id, RecommendationService $recommendationService): Response
+    // {
+    //     $recommendations = $recommendationService->getRecommendationsForGame_id($game->getId());
+    //     return $this->json([
+    //         'game' => $game,
+    //         'recommendations' => $recommendations
+    //     ], 200, [], ['groups' => 'game:read']);
+    // }
 }
