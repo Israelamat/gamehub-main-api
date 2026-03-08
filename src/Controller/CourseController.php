@@ -2,10 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Course;
-use App\Entity\User;
-use App\Repository\CourseRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\CourseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,72 +11,46 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/course')]
 final class CourseController extends AbstractController
 {
-    #[Route(name: 'app_course_index', methods: ['GET'])]
-    public function index(CourseRepository $courseRepository): Response
+    public function __construct(
+        private readonly CourseService $courseService
+    ) {}
+
+    #[Route('', name: 'app_course_index', methods: ['GET'])]
+    public function index(): Response
     {
-        $courses = $courseRepository->findAll();
+        $courses = $this->courseService->getCourses();
         return $this->json($courses, 200, [], ['groups' => 'course:read']);
     }
 
-    #[Route(name: 'app_course_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('', name: 'app_course_new', methods: ['POST'])]
+    public function new(Request $request): Response
     {
-        $data = $request->toArray();
+        $course = $this->courseService->createCourse(
+            $request->toArray(),
+            $this->getUser()
+        );
 
-        $course = new Course();
-        $course->setTitle($data['title'] ?? 'Course without title');
-        $course->setContent($data['content'] ?? null);
-        $course->setPrice($data['price'] ?? 0);
-        $course->setDuration($data['duration'] ?? 0);
-
-        $user = $this->getUser() ?? $entityManager->getRepository(User::class)->find($data['user_id']);
-
-        if (!$user) {
-            return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
-        }
-        $course->setCreatedBy($user);
-
-        $entityManager->persist($course);
-        $entityManager->flush();
-
-        return $this->json(['message' => 'Course created'], Response::HTTP_CREATED);
+        return $this->json(['message' => 'Course created', 'id' => $course->getId()], Response::HTTP_CREATED);
     }
 
-    #[Route('/{id}', name: 'app_course_show', methods: ['GET'])]
-    public function show(Course $course): Response
+    #[Route('/{id}', name: 'app_course_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function show(int $id): Response
     {
+        $course = $this->courseService->getCourseById($id);
         return $this->json($course, 200, [], ['groups' => 'course:read']);
     }
 
-    #[Route('/{id}/edit', name: 'app_course_edit', methods: ['PUT'])]
-    public function edit(Request $request, Course $course, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}', name: 'app_course_edit', methods: ['PUT'], requirements: ['id' => '\d+'])]
+    public function edit(int $id, Request $request): Response
     {
-        $data = $request->toArray();
-
-        if (isset($data['title'])) {
-            $course->setTitle($data['title']);
-        }
-        if (isset($data['content'])) {
-            $course->setContent($data['content']);
-        }
-        if (isset($data['duration'])) {
-            $course->setDuration($data['duration']);
-        }
-        if (isset($data['price'])) {
-            $course->setPrice($data['price']);
-        }
-
-        $entityManager->flush();
-
-        return $this->json(['message' => 'Course updated'], Response::HTTP_OK);
+        $this->courseService->updateCourse($id, $request->toArray());
+        return $this->json(['message' => 'Course updated']);
     }
 
-    #[Route('/{id}', name: 'app_course_delete', methods: ['DELETE'])]
-    public function delete(Course $course, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}', name: 'app_course_delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
+    public function delete(int $id): Response
     {
-        $entityManager->remove($course);
-        $entityManager->flush();
-
-        return $this->json(['message' => 'Curso deleted'], Response::HTTP_NO_CONTENT);
+        $this->courseService->deleteCourse($id);
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }
