@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CourseRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -19,7 +21,7 @@ class Course
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'order:read'])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 5, max: 255)]
     private ?string $title = null;
@@ -50,9 +52,16 @@ class Course
     #[Groups(['course:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
+    /**
+     * @var Collection<int, Order>
+     */
+    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'courses')]
+    private Collection $orders;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,5 +132,32 @@ class Course
     public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->addCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            $order->removeCourse($this);
+        }
+
+        return $this;
     }
 }

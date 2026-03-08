@@ -2,10 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Order;
-use App\Entity\User;
-use App\Enum\OrderStatus;
-use App\Repository\OrderRepository;
+use App\Service\OrderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,34 +12,36 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/order')]
 class OrderController extends AbstractController
 {
-    #[Route('', name: 'app_order', methods: ['GET'])]
-    public function index(OrderRepository $orderRepository): Response
+    public function __construct(
+        private readonly OrderService $orderService
+    ) {}
+
+    #[Route('/{id}', name: 'app_order_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function index(int $id): Response
     {
-        $orders = $orderRepository->findBy([], ['id' => 'ASC'], 10);
-        return $this->json($orders, 200, [], ['groups' => 'order:read']);
+        $order = $this->orderService->getOrderById($id);
+        return $this->json($order, 200, [], ['groups' => 'order:read']);
     }
 
     #[Route('', name: 'app_order_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $data = $request->toArray();
+        $order = $this->orderService->createOrder(
+            $request->toArray(),
+            $this->getUser()
+        );
 
-        $order = new Order();
+        return $this->json([
+            'message' => 'Order created',
+            'reference' => $order->getReference(),
+            'total' => $order->getTotal()
+        ], Response::HTTP_CREATED);
+    }
 
-        $order->setReference($data['reference'] ?? 'ORD-' . strtoupper(bin2hex(random_bytes(4))));
-        $order->setTotal((float)$data['total']);
-        $order->setStatus(OrderStatus::PENDING);
-
-        $user = $this->getUser() ?? $entityManager->getRepository(User::class)->find($data['user_id']);
-
-        if (!$user) {
-            return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
-        }
-        $order->setUser($user);
-
-        $entityManager->persist($order);
-        $entityManager->flush();
-
-        return $this->json(['message' => 'Order created', 'reference' => $order->getReference()], Response::HTTP_CREATED);
+    #[Route('/user/{id}', name: 'app_order_user', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function getOrdersByUser(int $id): Response
+    {
+        $orders = $this->orderService->getOrdersByUser($id);
+        return $this->json($orders, 200, [], ['groups' => 'order:read']);
     }
 }

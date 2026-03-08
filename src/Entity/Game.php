@@ -22,7 +22,7 @@ class Game
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'order:read'])]
     #[Assert\NotBlank(message: "The game must have a title.")]
     #[Assert\Length(max: 255)]
     private ?string $title = null;
@@ -90,11 +90,18 @@ class Game
     #[Groups(['game:read'])]
     private ?string $screenshot = null;
 
+    /**
+     * @var Collection<int, Order>
+     */
+    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'games')]
+    private Collection $orders;
+
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->stock = 99;
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -256,6 +263,33 @@ class Game
     public function setScreenshot(?string $screenshot): static
     {
         $this->screenshot = $screenshot;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->addGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            $order->removeGame($this);
+        }
 
         return $this;
     }
