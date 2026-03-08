@@ -2,10 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Game;
-use App\Repository\GameRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\GameService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,73 +13,38 @@ use App\Service\RecommendationService;
 #[Route('/games')]
 final class GameController extends AbstractController
 {
-    #[Route(name: 'app_game_index', methods: ['GET'])]
-    public function index(GameRepository $gameRepository): Response
+    public function __construct(
+        private readonly GameService $gameService
+    ) {}
+
+    #[Route('', name: 'app_game_index', methods: ['GET'])]
+    public function index(Request $request): JsonResponse
     {
-        $games = $gameRepository->findBy([], ['id' => 'ASC'], 10);
+        $filters = $request->query->all();
+
+        $games = empty($filters)
+            ? $this->gameService->getGames()
+            : $this->gameService->getGamesByFilters($filters);
+
         return $this->json($games, 200, [], ['groups' => 'game:read']);
     }
 
-    #[Route('', name: 'app_game_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}', name: 'app_game_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function showById(int $id): JsonResponse
     {
-        $data = $request->toArray();
-
-        $game = new Game();
-        $game->setTitle($data['title'] ?? 'Game without title');
-        $game->setPrice($data['price'] ?? 0);
-        $game->setDescription($data['description'] ?? null);
-        $game->setStock($data['stock'] ?? 0);
-
-        $user = $this->getUser();
-        if ($user) {
-            $game->setCreatedBy($user);
-        }
-
-        $entityManager->persist($game);
-        $entityManager->flush();
-
-        return $this->json($game, 201, [], ['groups' => 'game:read']);
-    }
-
-    #[Route('/{id}', name: 'app_game_show', methods: ['GET'])]
-    public function show(Game $game): Response
-    {
+        $game = $this->gameService->getGameById($id);
         return $this->json($game, 200, [], ['groups' => 'game:read']);
     }
 
-    #[Route('/{id}/edit', name: 'app_game_edit', methods: ['PUT'])]
-    public function edit(Request $request, Game $game, EntityManagerInterface $entityManager): Response
+    #[Route('/steam/{appId}', name: 'app_steam_game_show', methods: ['GET'], requirements: ['appId' => '\d+'])]
+    public function showBySteamID(int $appId): JsonResponse
     {
-        $data = $request->toArray();
-        if (isset($data['title'])) {
-            $game->setTitle($data['title']);
-        }
-        if (isset($data['description'])) {
-            $game->setDescription($data['description']);
-        }
-        if (isset($data['price'])) {
-            $game->setPrice($data['price']);
-        }
-        if (isset($data['stock'])) {
-            $game->setStock($data['stock']);
-        }
+        $game = $this->gameService->getGameBySteamId($appId);
 
-        $entityManager->flush();
-
-        return $this->json(['message' => 'Game updated'], Response::HTTP_OK);
+        return $this->json($game, 200, [], ['groups' => 'game:read']);
     }
 
-    #[Route('/{id}', name: 'app_game_delete', methods: ['DELETE'])]
-    public function delete(Game $game, EntityManagerInterface $entityManager): Response
-    {
-        $entityManager->remove($game);
-        $entityManager->flush();
-
-        return $this->json(['message' => 'Gamae deleted'], 200);
-    }
-
-    #[Route('/recommend/{title}', name: 'app_game_show', methods: ['GET'])]
+    #[Route('/recommend/{title}', name: 'app_game_show_recommend', methods: ['GET'])]
     public function recommend(
         string $title,
         RecommendationService $recommendationService
