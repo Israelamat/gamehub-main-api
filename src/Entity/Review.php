@@ -6,6 +6,8 @@ use App\Repository\ReviewRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 class Review
@@ -18,11 +20,17 @@ class Review
 
     #[ORM\Column]
     #[Groups(['review:read'])]
+    #[Assert\NotBlank]
+    #[Assert\Range(min: 1, max: 5, notInRangeMessage: "Rating must be between 1 and 5<")]
     private ?int $rating = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['review:read'])]
     private ?string $comment = null;
+
+    #[ORM\Column]
+    #[Groups(['review:read'])]
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
@@ -33,6 +41,11 @@ class Review
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['review:read'])]
     private ?Game $game = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {

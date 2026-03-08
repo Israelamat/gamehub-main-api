@@ -6,6 +6,7 @@ use App\Enum\OrderStatus;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use DateTimeImmutable;
 
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -31,8 +32,18 @@ class Order
     private ?OrderStatus $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: false)]
     #[Groups(['order:read'])]
     private ?User $user = null;
+
+    #[ORM\Column]
+    #[Groups(['order:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -85,5 +96,10 @@ class Order
         $this->user = $user;
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 }

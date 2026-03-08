@@ -8,8 +8,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
+#[UniqueEntity(fields: ['appId'], message: 'This Steam AppID is already in our catalog.')]
 class Game
 {
     #[ORM\Id]
@@ -20,18 +23,24 @@ class Game
 
     #[ORM\Column(length: 255)]
     #[Groups(['game:read'])]
+    #[Assert\NotBlank(message: "The game must have a title.")]
+    #[Assert\Length(max: 255)]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['game:read'])]
+    #[Assert\NotBlank]
     private ?string $description = null;
 
     #[ORM\Column]
     #[Groups(['game:read'])]
+    #[Assert\PositiveOrZero(message: "Price cannot be negative.")]
     private ?float $price = null;
 
     #[ORM\Column]
     #[Groups(['game:read'])]
+    #[Assert\Type('integer')]
+    #[Assert\GreaterThanOrEqual(0)]
     private ?int $stock = null;
 
 
@@ -48,27 +57,37 @@ class Game
      * @var Collection<int, Review>
      */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'game')]
+    #[Groups(['game:read'])]
     private Collection $reviews;
 
     #[ORM\Column(unique: true)]
+    #[Groups(['game:read'])]
+    #[Assert\NotNull]
     private ?int $appId = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['game:read'])]
+    #[Assert\Url(message: "The header image must be a valid URL.")]
     private ?string $headerImage = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['game:read'])]
     private ?string $genres = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['game:read'])]
     private ?string $tags = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['game:read'])]
     private ?string $metadata = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['game:read'])]
     private ?string $developer = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['game:read'])]
     private ?string $screenshot = null;
 
     public function __construct()
@@ -136,13 +155,6 @@ class Game
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     public function getCreatedBy(): ?User
     {
         return $this->createdBy;
@@ -190,13 +202,6 @@ class Game
         return $this->appId;
     }
 
-    public function setAppId(int $appId): static
-    {
-        $this->appId = $appId;
-
-        return $this;
-    }
-
     public function getHeaderImage(): ?string
     {
         return $this->headerImage;
@@ -226,23 +231,9 @@ class Game
         return $this->tags;
     }
 
-    public function setTags(?string $tags): static
-    {
-        $this->tags = $tags;
-
-        return $this;
-    }
-
     public function getMetadata(): ?string
     {
         return $this->metadata;
-    }
-
-    public function setMetadata(?string $metadata): static
-    {
-        $this->metadata = $metadata;
-
-        return $this;
     }
 
     public function getDeveloper(): ?string

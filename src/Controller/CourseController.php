@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Course;
+use App\Entity\User;
 use App\Repository\CourseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +21,7 @@ final class CourseController extends AbstractController
         return $this->json($courses, 200, [], ['groups' => 'course:read']);
     }
 
-    #[Route('/new', name: 'app_course_new', methods: ['POST'])]
+    #[Route(name: 'app_course_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $data = $request->toArray();
@@ -31,14 +32,17 @@ final class CourseController extends AbstractController
         $course->setPrice($data['price'] ?? 0);
         $course->setDuration($data['duration'] ?? 0);
 
-        if ($user = $this->getUser()) {
-            $course->setCreatedBy($user);
+        $user = $this->getUser() ?? $entityManager->getRepository(User::class)->find($data['user_id']);
+
+        if (!$user) {
+            return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
+        $course->setCreatedBy($user);
 
         $entityManager->persist($course);
         $entityManager->flush();
 
-        return $this->json($course, 201, [], ['groups' => 'course:read']);
+        return $this->json(['message' => 'Course created'], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'app_course_show', methods: ['GET'])]
