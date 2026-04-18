@@ -1,4 +1,4 @@
-# 🎮 GameHub API: High-Performance Gaming & E-Learning Engine
+# 🎮 GameHub API: Gaming E-Comerce & E-Learning 
 
 **GameHub API** is a robust, production-ready RESTful service designed to power a dual-purpose ecosystem: a high-traffic video game marketplace and a comprehensive educational training platform. Built with **Symfony 7** and **PHP 8.2**, it follows strict **SOLID** principles and a modern **API-First** approach.
 
