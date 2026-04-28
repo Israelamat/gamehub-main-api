@@ -58,6 +58,10 @@ class Course
     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'courses')]
     private Collection $orders;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(['course:read'])]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -157,6 +161,18 @@ class Course
         if ($this->orders->removeElement($order)) {
             $order->removeCourse($this);
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): static
+    {
+        $this->image = $image;
 
         return $this;
     }

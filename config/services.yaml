@@ -8,6 +8,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.fastapi_url: 'http://127.0.0.1:8001/recommend/'
+    app.admin_email: '%env(ADMIN_EMAIL)%'
 
 services:
     # default configuration for services in *this* file
