@@ -28,12 +28,12 @@ class Game
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'order:read'])]
     #[Assert\NotBlank]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'order:read'])]
     #[Assert\PositiveOrZero(message: "Price cannot be negative.")]
     private ?float $price = null;
 
@@ -61,12 +61,12 @@ class Game
     private Collection $reviews;
 
     #[ORM\Column(unique: true)]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'order:read'])]
     #[Assert\NotNull]
     private ?int $appId = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'order:read'])]
     #[Assert\Url(message: "The header image must be a valid URL.")]
     private ?string $headerImage = null;
 

@@ -36,6 +36,24 @@ final class GameController extends AbstractController
         return $this->json($game, 200, [], ['groups' => 'game:read']);
     }
 
+    #[Route('/by-ids', name: 'app_game_by_ids', methods: ['POST'])]
+    public function getByIds(Request $request): JsonResponse
+    {
+        $data = $request->toArray();
+
+        $ids = $data['ids'] ?? [];
+
+        if (!is_array($ids) || empty($ids)) {
+            return $this->json([
+                'message' => 'Ids array is required'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $games = $this->gameService->getGamesByIds($ids);
+
+        return $this->json($games, 200, [], ['groups' => 'game:read']);
+    }
+
     #[Route('/steam/{appId}', name: 'app_steam_game_show', methods: ['GET'], requirements: ['appId' => '\d+'])]
     public function showBySteamID(int $appId): JsonResponse
     {

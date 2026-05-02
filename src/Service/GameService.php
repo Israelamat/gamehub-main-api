@@ -53,6 +53,21 @@ class GameService
         return $results[0];
     }
 
+    public function getGameByAppId(int $appId): Game
+    {
+        $game = $this->repository->findOneBy(['appId' => $appId]);
+
+        if (!$game) {
+            throw new NotFoundHttpException("Game with appId $appId not found");
+        }
+
+        return $game;
+    }
+
+    public function getGamesByIds(array $ids): array
+    {
+        return $this->repository->findBy(['appId' => $ids]);
+    }
 
     public function getGameBySteamId(int $appId): Game
     {

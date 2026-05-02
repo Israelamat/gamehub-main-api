@@ -29,6 +29,12 @@ class CourseService
         return $course;
     }
 
+
+    public function getCoursesByIds(array $ids): array
+    {
+        return $this->repository->findBy(['id' => $ids]);
+    }
+
     public function createCourse(array $data, ?User $currentUser): Course
     {
         $course = new Course();

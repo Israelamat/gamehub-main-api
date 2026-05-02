@@ -17,7 +17,7 @@ class Course
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'order:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -27,12 +27,12 @@ class Course
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'order:read'])]
     #[Assert\NotBlank]
     private ?string $content = null;
 
     #[ORM\Column]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'order:read'])]
     #[Assert\NotNull]
     #[Assert\PositiveOrZero]
     private ?float $price = null;
@@ -59,7 +59,7 @@ class Course
     private Collection $orders;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['course:read'])]
+    #[Groups(['course:read', 'order:read'])]
     private ?string $image = null;
 
     public function __construct()

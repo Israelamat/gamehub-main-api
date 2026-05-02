@@ -43,7 +43,7 @@ class OrderService
 
         if (!empty($data['game_ids'])) {
             foreach ($data['game_ids'] as $gameId) {
-                $game = $this->gameService->getGameById($gameId); //Check if the game exists
+                $game = $this->gameService->getGameByAppId($gameId); //Check if the game exists
                 $order->addGame($game);
                 $total += $game->getPrice();
             }

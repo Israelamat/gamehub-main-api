@@ -34,10 +34,29 @@ final class CourseController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_course_show', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function show(int $id): Response
+    public function showById(int $id): Response
     {
         $course = $this->courseService->getCourseById($id);
         return $this->json($course, 200, [], ['groups' => 'course:read']);
+    }
+
+
+    #[Route('/by-ids', name: 'app_course_by_ids', methods: ['POST'])]
+    public function getByIds(Request $request): Response
+    {
+        $data = $request->toArray();
+
+        $ids = $data['ids'] ?? [];
+
+        if (!is_array($ids) || empty($ids)) {
+            return $this->json([
+                'message' => 'Ids array is required'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $courses = $this->courseService->getCoursesByIds($ids);
+
+        return $this->json($courses, 200, [], ['groups' => 'course:read']);
     }
 
     #[Route('/{id}', name: 'app_course_edit', methods: ['PUT'], requirements: ['id' => '\d+'])]
