@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class MailController extends AbstractController
 {
-    #[Route('/contact', name: 'api_contact', methods: ['POST'])]
+    #[Route('/api/contact', name: 'api_contact', methods: ['POST'])]
     public function contact(Request $request, MailerInterface $mailer): JsonResponse
     {
         $adminAddress = $this->getParameter('app.admin_email');

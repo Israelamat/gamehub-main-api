@@ -4,16 +4,19 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 class UserService
 {
     public function __construct(
         private readonly UserRepository $repository,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly JWTTokenManagerInterface $jwtManager
     ) {}
 
     public function getUserById(int $id): User
@@ -66,5 +69,39 @@ class UserService
         $user = $this->getUserById($id);
         $this->entityManager->remove($user);
         $this->entityManager->flush();
+    }
+
+    public function login(?string $email, ?string $password): JsonResponse
+    {
+        if (!$email || !$password) {
+            return new JsonResponse([
+                'message' => 'Email and password required'
+            ], 400);
+        }
+
+        $user = $this->repository->findOneBy(['email' => $email]);
+
+        if (!$user) {
+            return new JsonResponse([
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        if (!$this->passwordHasher->isPasswordValid($user, $password)) {
+            return new JsonResponse([
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
+
+        $token = $this->jwtManager->create($user);
+
+        return new JsonResponse([
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles()
+            ]
+        ]);
     }
 }

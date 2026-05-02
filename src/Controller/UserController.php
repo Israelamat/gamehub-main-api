@@ -3,16 +3,30 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/user')]
+#[Route('/api/user')]
 final class UserController extends AbstractController
 {
+    #[Route('/login', name: 'api_login', methods: ['POST'])]
+    public function login(Request $request, UserService $authService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        return $authService->login(
+            $data['email'] ?? null,
+            $data['password'] ?? null
+        );
+    }
+
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
@@ -42,6 +56,7 @@ final class UserController extends AbstractController
 
 
     #[Route('/{id}/edit', name: 'app_user_edit', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function edit(
         Request $request,
         User $user,
@@ -64,6 +79,7 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(User $user, EntityManagerInterface $entityManager): Response
     {
         $entityManager->remove($user);

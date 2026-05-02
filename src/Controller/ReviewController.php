@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/review')]
+#[Route('/api/review')]
 class ReviewController extends AbstractController
 {
     #[Route('', name: 'app_review', methods: ['GET'])]
