@@ -79,7 +79,7 @@ class UserService
             ], 400);
         }
 
-        $user = $this->repository->findOneBy(['email' => $email]);
+        $user = $this->repository->findByEmail($email);
 
         if (!$user) {
             return new JsonResponse([

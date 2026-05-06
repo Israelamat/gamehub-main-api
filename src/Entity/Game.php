@@ -18,7 +18,7 @@ class Game
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'review:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -61,7 +61,7 @@ class Game
     private Collection $reviews;
 
     #[ORM\Column(unique: true)]
-    #[Groups(['game:read', 'order:read'])]
+    #[Groups(['game:read', 'order:read', 'review:read'])]
     #[Assert\NotNull]
     private ?int $appId = null;
 

@@ -15,4 +15,15 @@ class ReviewRepository extends BaseRepository
     {
         parent::__construct($registry, Review::class);
     }
+
+    public function findByGameAppId(int $appId): array
+    {
+        return $this->createQueryBuilder('r')
+            ->join('r.game', 'g')
+            ->where('g.appId = :appId')
+            ->setParameter('appId', $appId)
+            ->orderBy('r.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

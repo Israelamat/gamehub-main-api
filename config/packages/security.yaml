@@ -9,43 +9,18 @@ security:
                 property: email
 
     firewalls:
-        dev:
-            pattern: ^/(_profiler|_wdt|assets|build)/
-            security: false
 
         login:
-            pattern: ^/api/login
+            pattern: ^/api/user/login
             stateless: true
-            json_login:
-                check_path: /api/login
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            security: false
 
         api:
             pattern: ^/api
             stateless: true
-            provider: app_user_provider
-            jwt: ~
+            security: false
 
-
-    access_control:
-        # Public
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/user$, methods: [POST], roles: PUBLIC_ACCESS } # register
-        - { path: ^/api/games$, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/course$, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/order$, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/game/recommend, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/contact$, methods: [GET], roles: PUBLIC_ACCESS }
-
-        # Roles
-        - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/create-content, roles: ROLE_CREATOR }
-
-        # Authenticated
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+    access_control: []
 
 when@test:
     security:

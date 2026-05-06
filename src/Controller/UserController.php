@@ -12,16 +12,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 #[Route('/api/user')]
 final class UserController extends AbstractController
 {
     #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(Request $request, UserService $authService): JsonResponse
+    public function login(Request $request, UserService $userService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        return $authService->login(
+        return $userService->login(
             $data['email'] ?? null,
             $data['password'] ?? null
         );
@@ -37,8 +38,10 @@ final class UserController extends AbstractController
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        JWTTokenManagerInterface $jwtManager
     ): Response {
+
         $data = $request->toArray();
 
         $user = new User();
@@ -51,7 +54,16 @@ final class UserController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return $this->json(['message' => 'User created'], Response::HTTP_CREATED);
+        $token = $jwtManager->create($user);
+
+        return $this->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getUserIdentifier(),
+                'roles' => $user->getRoles()
+            ]
+        ], Response::HTTP_CREATED);
     }
 
 
