@@ -22,12 +22,12 @@ class ReviewService
         return $this->repository->findBy([], ['id' => 'DESC'], 10);
     }
 
-    public function getReviewsByAppId(int $appId): array
+    public function getReviewsByAppId(int $gameId): array
     {
-        $reviews = $this->repository->findByGameAppId($appId);
+        $reviews = $this->repository->findByGameId($gameId);
 
         if (empty($reviews)) {
-            throw new NotFoundHttpException("No reviews found for appId $appId");
+            throw new NotFoundHttpException("No reviews found for appId $gameId");
         }
 
         return $reviews;
@@ -35,7 +35,6 @@ class ReviewService
 
     public function createReview(array $data, ?User $user = null): Review
     {
-        // 🔹 VALIDACIONES
         if (!isset($data['rating']) || $data['rating'] < 1 || $data['rating'] > 5) {
             throw new BadRequestHttpException("Rating must be between 1 and 5.");
         }
@@ -44,13 +43,11 @@ class ReviewService
             throw new BadRequestHttpException("game_id is required.");
         }
 
-        // 🔹 GAME
         $game = $this->em->getRepository(Game::class)->find($data['game_id']);
         if (!$game) {
             throw new NotFoundHttpException("Game not found.");
         }
 
-        // 🔹 USER
         if (!$user && isset($data['user_id'])) {
             $user = $this->em->getRepository(User::class)->find($data['user_id']);
         }
@@ -59,7 +56,6 @@ class ReviewService
             throw new NotFoundHttpException("User not found.");
         }
 
-        // 🔹 CREAR REVIEW
         $review = new Review();
         $review->setRating($data['rating']);
         $review->setComment($data['comment'] ?? null);

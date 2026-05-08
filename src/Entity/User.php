@@ -61,12 +61,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
     private Collection $orders;
 
+    /**
+     * @var Collection<int, CommunityGame>
+     */
+    #[ORM\OneToMany(targetEntity: CommunityGame::class, mappedBy: 'user')]
+    private Collection $communityGame;
+
     public function __construct()
     {
         $this->courses = new ArrayCollection();
         $this->games = new ArrayCollection();
         $this->reviews = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->communityGame = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -264,6 +271,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($order->getUser() === $this) {
                 $order->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CommunityGame>
+     */
+    public function getCommunityGame(): Collection
+    {
+        return $this->communityGame;
+    }
+
+    public function addCommunityGame(CommunityGame $communityGame): static
+    {
+        if (!$this->communityGame->contains($communityGame)) {
+            $this->communityGame->add($communityGame);
+            $communityGame->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommunityGame(CommunityGame $communityGame): static
+    {
+        if ($this->communityGame->removeElement($communityGame)) {
+            // set the owning side to null (unless already changed)
+            if ($communityGame->getUser() === $this) {
+                $communityGame->setUser(null);
             }
         }
 
