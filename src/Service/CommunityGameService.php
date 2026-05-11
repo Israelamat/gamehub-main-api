@@ -46,15 +46,11 @@ class CommunityGameService
         $communityGame->setRating($data['rating'] ?? 0);
         $communityGame->setPrice($data['price'] ?? 0);
 
-        $user = $currentUser ?? $this->entityManager
-            ->getRepository(User::class)
-            ->find($data['user_id'] ?? 0);
-
-        if (!$user) {
-            throw new NotFoundHttpException('User not found');
+        if (!$currentUser) {
+            throw new NotFoundHttpException('User not authenticated');
         }
 
-        $communityGame->setCreatedBy($user);
+        $communityGame->setCreatedBy($currentUser);
 
         return $this->repository->create($communityGame);
     }

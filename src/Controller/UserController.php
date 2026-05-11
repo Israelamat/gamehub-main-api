@@ -22,10 +22,18 @@ final class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        return $userService->login(
-            $data['email'] ?? null,
-            $data['password'] ?? null
-        );
+        try {
+            $result = $userService->login(
+                $data['email'] ?? '',
+                $data['password'] ?? ''
+            );
+
+            return new JsonResponse($result);
+        } catch (\RuntimeException $e) {
+            return new JsonResponse([
+                'message' => $e->getMessage()
+            ], 401);
+        }
     }
 
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
@@ -97,5 +105,24 @@ final class UserController extends AbstractController
         $entityManager->remove($user);
         $entityManager->flush();
         return $this->json(['message' => 'User deleted'], Response::HTTP_OK);
+    }
+
+    #[Route('/profile', name: 'app_user_profile', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function profile(): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->json([
+                'message' => 'User not authenticated'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return $this->json([
+            'id' => $user->getId(),
+            'email' => $user->getUserIdentifier(),
+            'roles' => $user->getRoles()
+        ]);
     }
 }

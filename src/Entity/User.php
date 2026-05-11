@@ -64,8 +64,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, CommunityGame>
      */
-    #[ORM\OneToMany(targetEntity: CommunityGame::class, mappedBy: 'user')]
-    private Collection $communityGame;
+    #[ORM\OneToMany(targetEntity: CommunityGame::class, mappedBy: 'createdBy')]
+    private Collection $communityGames;
 
     public function __construct()
     {
@@ -73,7 +73,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->games = new ArrayCollection();
         $this->reviews = new ArrayCollection();
         $this->orders = new ArrayCollection();
-        $this->communityGame = new ArrayCollection();
+        $this->communityGames = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -280,16 +280,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, CommunityGame>
      */
-    public function getCommunityGame(): Collection
+    public function getCommunityGames(): Collection
     {
-        return $this->communityGame;
+        return $this->communityGames;
     }
 
     public function addCommunityGame(CommunityGame $communityGame): static
     {
-        if (!$this->communityGame->contains($communityGame)) {
-            $this->communityGame->add($communityGame);
-            $communityGame->setUser($this);
+        if (!$this->communityGames->contains($communityGame)) {
+            $this->communityGames->add($communityGame);
+            $communityGame->setCreatedBy($this);
         }
 
         return $this;
@@ -297,10 +297,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeCommunityGame(CommunityGame $communityGame): static
     {
-        if ($this->communityGame->removeElement($communityGame)) {
+        if ($this->communityGames->removeElement($communityGame)) {
             // set the owning side to null (unless already changed)
-            if ($communityGame->getUser() === $this) {
-                $communityGame->setUser(null);
+            if ($communityGame->getCreatedBy() === $this) {
+                $communityGame->setCreatedBy(null);
             }
         }
 

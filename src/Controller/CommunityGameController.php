@@ -55,29 +55,6 @@ final class CommunityGameController extends AbstractController
         );
     }
 
-    #[Route('/by-ids', name: 'app_community_game_by_ids', methods: ['POST'])]
-    public function getByIds(Request $request): Response
-    {
-        $data = $request->toArray();
-
-        $ids = $data['ids'] ?? [];
-
-        if (!is_array($ids) || empty($ids)) {
-            return $this->json([
-                'message' => 'Ids array is required'
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $communityGames = $this->communityGameService->getCommunityGamesByIds($ids);
-
-        return $this->json(
-            $communityGames,
-            200,
-            [],
-            ['groups' => 'community_game:read']
-        );
-    }
-
     #[Route('/{id}', name: 'app_community_game_edit', methods: ['PUT'], requirements: ['id' => '\d+'])]
     public function edit(int $id, Request $request): Response
     {

@@ -71,37 +71,27 @@ class UserService
         $this->entityManager->flush();
     }
 
-    public function login(?string $email, ?string $password): JsonResponse
+    public function login(string $email, string $password): array
     {
-        if (!$email || !$password) {
-            return new JsonResponse([
-                'message' => 'Email and password required'
-            ], 400);
-        }
-
         $user = $this->repository->findByEmail($email);
 
         if (!$user) {
-            return new JsonResponse([
-                'message' => 'User not found'
-            ], 404);
+            throw new \RuntimeException('User not found');
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $password)) {
-            return new JsonResponse([
-                'message' => 'Invalid credentials'
-            ], 401);
+            throw new \RuntimeException('Invalid credentials');
         }
 
         $token = $this->jwtManager->create($user);
 
-        return new JsonResponse([
+        return [
             'token' => $token,
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
-                'roles' => $user->getRoles()
+                'roles' => $user->getRoles(),
             ]
-        ]);
+        ];
     }
 }

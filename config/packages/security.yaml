@@ -13,20 +13,21 @@ security:
         login:
             pattern: ^/api/user/login
             stateless: true
+
+        public:
+            pattern: ^/api/(games|course|reviews|community-game|review)
+            stateless: true
             security: false
 
         api:
             pattern: ^/api
             stateless: true
-            security: false
+            jwt: ~
 
-    access_control: []
-
-when@test:
-    security:
-        password_hashers:
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4
-                time_cost: 3
-                memory_cost: 10
+    access_control:
+        - { path: ^/api/user/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/games, roles: PUBLIC_ACCESS }
+        - { path: ^/api/course, roles: PUBLIC_ACCESS }
+        - { path: ^/api/review, roles: PUBLIC_ACCESS }
+        - { path: ^/api/community-game, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
