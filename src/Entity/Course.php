@@ -58,9 +58,9 @@ class Course
     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'courses')]
     private Collection $orders;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     #[Groups(['course:read', 'order:read'])]
-    private ?string $image = null;
+    private ?string $imageBase64 = null;
 
     public function __construct()
     {
@@ -165,14 +165,14 @@ class Course
         return $this;
     }
 
-    public function getImage(): ?string
+    public function getImageBase64(): ?string
     {
-        return $this->image;
+        return $this->imageBase64;
     }
 
-    public function setImage(string $image): static
+    public function setImageBase64(string $imageBase64): static
     {
-        $this->image = $image;
+        $this->imageBase64 = $imageBase64;
 
         return $this;
     }

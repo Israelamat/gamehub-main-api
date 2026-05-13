@@ -42,6 +42,7 @@ class CourseService
         $course->setContent($data['content'] ?? null);
         $course->setPrice($data['price'] ?? 0);
         $course->setDuration($data['duration'] ?? 0);
+        $course->setImageBase64($data['imageBase64'] ?? '');
 
         $user = $currentUser ?? $this->entityManager->getRepository(User::class)->find($data['user_id'] ?? 0);
 

@@ -15,7 +15,7 @@ security:
             stateless: true
 
         public:
-            pattern: ^/api/(games|course|reviews|community-game|review)
+            pattern: ^/api/(games|course|reviews|review)
             stateless: true
             security: false
 
