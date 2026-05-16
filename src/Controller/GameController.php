@@ -17,7 +17,26 @@ final class GameController extends AbstractController
         private readonly GameService $gameService
     ) {}
 
-    #[Route('', name: 'app_game_index', methods: ['GET'])]
+
+    #[Route('', name: 'app_game_paginated', methods: ['GET'])]
+    public function paginated(Request $request): JsonResponse
+    {
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = min(50, $request->query->getInt('limit', 20));
+
+        $games = $this->gameService->getGamesPaginated(
+            $page,
+            $limit
+        );
+
+        return $this->json([
+            'data' => $games,
+            'page' => $page,
+            'hasMore' => count($games) === $limit
+        ], 200, [], ['groups' => 'game:read']);
+    }
+
+    #[Route('/limited', name: 'app_game_index', methods: ['GET'])]
     public function index(Request $request): JsonResponse
     {
         $filters = $request->query->all();

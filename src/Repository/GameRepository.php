@@ -15,4 +15,16 @@ class GameRepository extends BaseRepository
     {
         parent::__construct($registry, Game::class);
     }
+
+    public function findPaginated(
+        int $limit,
+        int $offset
+    ): array {
+        return $this->findBy(
+            [],
+            ['id' => 'DESC'],
+            $limit,
+            $offset
+        );
+    }
 }

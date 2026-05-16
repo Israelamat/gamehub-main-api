@@ -18,6 +18,18 @@ class GameService
         return $this->repository->findAllSafe();
     }
 
+    public function getGamesPaginated(
+        int $page,
+        int $limit
+    ): array {
+        $offset = ($page - 1) * $limit;
+
+        return $this->repository->findPaginated(
+            $limit,
+            $offset
+        );
+    }
+
     public function getGamesByFilters(array $filters): array
     {
         $allowedFilters = [
