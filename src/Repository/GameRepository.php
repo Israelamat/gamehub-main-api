@@ -27,4 +27,57 @@ class GameRepository extends BaseRepository
             $offset
         );
     }
+
+    public function findFilteredGames(
+        ?string $search,
+        ?string $tag,
+        ?float $maxPrice,
+        ?string $sort,
+        int $limit,
+        int $offset
+    ): array {
+        $qb = $this->createQueryBuilder('g');
+
+        if (!empty($search)) {
+            $qb->andWhere(
+                'g.title LIKE :search
+             OR g.developer LIKE :search
+             OR g.metadata LIKE :search'
+            )
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        if (!empty($tag) && $tag !== 'All') {
+            $qb->andWhere('g.tags LIKE :tag')
+                ->setParameter('tag', '%' . $tag . '%');
+        }
+
+        if (!empty($maxPrice)) {
+            $qb->andWhere('g.price <= :maxPrice')
+                ->setParameter('maxPrice', $maxPrice);
+        }
+
+        switch ($sort) {
+
+            case 'price_asc':
+                $qb->orderBy('g.price', 'ASC');
+                break;
+
+            case 'price_desc':
+                $qb->orderBy('g.price', 'DESC');
+                break;
+
+            case 'createdAt_desc':
+                $qb->orderBy('g.createdAt', 'DESC');
+                break;
+
+            default:
+                $qb->orderBy('g.id', 'DESC');
+        }
+
+        $qb->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
 }

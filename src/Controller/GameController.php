@@ -36,16 +36,30 @@ final class GameController extends AbstractController
         ], 200, [], ['groups' => 'game:read']);
     }
 
-    #[Route('/limited', name: 'app_game_index', methods: ['GET'])]
-    public function index(Request $request): JsonResponse
+    #[Route('/filtered', name: 'app_game_filtered', methods: ['GET'])]
+    public function filtered(Request $request): JsonResponse
     {
-        $filters = $request->query->all();
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = min(50, $request->query->getInt('limit', 20));
 
-        $games = empty($filters)
-            ? $this->gameService->getGames()
-            : $this->gameService->getGamesByFilters($filters);
+        $filters = [
+            'search' => $request->query->get('search'),
+            'tag' => $request->query->get('tag'),
+            'maxPrice' => $request->query->get('maxPrice'),
+            'sort' => $request->query->get('sort'),
+        ];
 
-        return $this->json($games, 200, [], ['groups' => 'game:read']);
+        $games = $this->gameService->getGamesFilteredPaginated(
+            $filters,
+            $page,
+            $limit
+        );
+
+        return $this->json([
+            'data' => $games,
+            'page' => $page,
+            'hasMore' => count($games) === $limit
+        ], 200, [], ['groups' => 'game:read']);
     }
 
     #[Route('/{id}', name: 'app_game_show', methods: ['GET'], requirements: ['id' => '\d+'])]
