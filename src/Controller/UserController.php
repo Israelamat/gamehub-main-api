@@ -36,6 +36,20 @@ final class UserController extends AbstractController
         }
     }
 
+    #[Route('', name: 'app_user_list', methods: ['GET'])]
+    public function list(UserService $userService): JsonResponse
+    {
+        $users = $userService->getAllUsers();
+
+        $data = array_map(fn(User $user) => [
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'roles' => $user->getRoles(),
+        ], $users);
+
+        return $this->json($data);
+    }
+
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {

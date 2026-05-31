@@ -94,4 +94,9 @@ class UserService
             ]
         ];
     }
+
+    public function getAllUsers(): array
+    {
+        return $this->repository->findAll();
+    }
 }
