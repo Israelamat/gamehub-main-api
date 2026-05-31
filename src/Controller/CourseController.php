@@ -30,7 +30,10 @@ final class CourseController extends AbstractController
             $this->getUser()
         );
 
-        return $this->json(['message' => 'Course created', 'id' => $course->getId()], Response::HTTP_CREATED);
+        return $this->json([
+            'message' => 'Course created',
+            'id' => $course->getId()
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'app_course_show', methods: ['GET'], requirements: ['id' => '\d+'])]

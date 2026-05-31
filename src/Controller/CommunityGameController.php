@@ -20,12 +20,7 @@ final class CommunityGameController extends AbstractController
     {
         $communityGames = $this->communityGameService->getCommunityGames();
 
-        return $this->json(
-            $communityGames,
-            200,
-            [],
-            ['groups' => 'community_game:read']
-        );
+        return $this->json($communityGames, 200, [], ['groups' => 'community_game:read']);
     }
 
     #[Route('', name: 'app_community_game_new', methods: ['POST'])]
@@ -47,12 +42,7 @@ final class CommunityGameController extends AbstractController
     {
         $communityGame = $this->communityGameService->getCommunityGameById($id);
 
-        return $this->json(
-            $communityGame,
-            200,
-            [],
-            ['groups' => 'community_game:read']
-        );
+        return $this->json($communityGame, 200, [], ['groups' => 'community_game:read']);
     }
 
     #[Route('/{id}', name: 'app_community_game_edit', methods: ['PUT'], requirements: ['id' => '\d+'])]
@@ -73,9 +63,6 @@ final class CommunityGameController extends AbstractController
     {
         $this->communityGameService->deleteCommunityGame($id);
 
-        return $this->json(
-            null,
-            Response::HTTP_NO_CONTENT
-        );
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }

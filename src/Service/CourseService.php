@@ -44,13 +44,10 @@ class CourseService
         $course->setDuration($data['duration'] ?? 0);
         $course->setImageBase64($data['imageBase64'] ?? '');
 
-        $user = $currentUser ?? $this->entityManager->getRepository(User::class)->find($data['user_id'] ?? 0);
-
-        if (!$user) {
+        if (!$currentUser) {
             throw new NotFoundHttpException('User not found');
         }
-
-        $course->setCreatedBy($user);
+        $course->setCreatedBy($currentUser);
 
         return $this->repository->create($course);
     }

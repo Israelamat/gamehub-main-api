@@ -52,9 +52,15 @@ class GameRepository extends BaseRepository
                 ->setParameter('tag', '%' . $tag . '%');
         }
 
-        if (!empty($maxPrice)) {
-            $qb->andWhere('g.price <= :maxPrice')
-                ->setParameter('maxPrice', $maxPrice);
+        if ($maxPrice !== null && $maxPrice !== '') {
+            $maxPrice = (float) $maxPrice;
+
+            if ($maxPrice <= 0) {
+                $qb->andWhere('g.price = 0');
+            } else {
+                $qb->andWhere('g.price <= :maxPrice')
+                    ->setParameter('maxPrice', $maxPrice);
+            }
         }
 
         switch ($sort) {
